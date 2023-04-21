@@ -57,7 +57,7 @@ def recommendation_by_user():
         userId = request.form['userId']
         number = request.form['number']
 
-        response = dao.recommendMoviesGivenUser(userId, number)
+        response = dao.recommendMoviesGivenUserV2(userId, number)
 
     return render_template('pages/recommendation_by_user.html', form=form, response=response)
 
