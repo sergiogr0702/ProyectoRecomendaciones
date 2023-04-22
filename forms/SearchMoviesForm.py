@@ -34,21 +34,21 @@ class MultiCheckboxField(SelectMultipleField):
 
 
 class SearchMoviesForm(FlaskForm):
-    categories = MultiCheckboxField('Categories',
-                                    choices=[('Action', 'Action'),
-                                             ('Adventure', 'Adventure'),
-                                             ('Animation', 'Animation'),
-                                             ('Comedy', 'Comedy'),
-                                             ('Crime', 'Crime'),
-                                             ('Documentary', 'Documentary'),
+    categories = MultiCheckboxField('Categorías',
+                                    choices=[('Action', 'Acción'),
+                                             ('Adventure', 'Aventura'),
+                                             ('Animation', 'Animación'),
+                                             ('Comedy', 'Comedia'),
+                                             ('Crime', 'Crimen'),
+                                             ('Documentary', 'Documental'),
                                              ('Drama', 'Drama'),
-                                             ('Fantasy', 'Fantasy'),
+                                             ('Fantasy', 'Fantasía'),
                                              ('Horror', 'Horror'),
                                              ('Musical', 'Musical'),
-                                             ('Mystery', 'Mystery'),
+                                             ('Mystery', 'Misterio'),
                                              ('Romance', 'Romance'),
                                              ('Thriller', 'Thriller'),
-                                             ('War', 'War'),
+                                             ('War', 'Bélico'),
                                              ('Western', 'Western')]
                                     )
 

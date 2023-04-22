@@ -8,6 +8,24 @@ class operations:
     def __init__(self, client):
         self.client = client
 
+    def searchUsers(self, ocupation, age, gender, N):
+
+        query = "SELECT UserID, Age, Gender, Occupation, ZipCode FROM User WHERE Age = {} AND Occupation = {} AND Gender = '{}' LIMIT {}"
+
+        results = self.client.command(query.format(int(age), int(ocupation), gender, N))
+
+        if len(results) == 0:
+            return []
+
+        usersList = []
+
+        for item in results:
+            user_props = item.oRecordData
+            usersList.append({'userID': user_props['UserID'], 'age': user_props['Age'], 'gender': user_props['Gender'],
+                              'ocupation': user_props['Occupation'], 'zipCode': user_props['ZipCode']})
+
+        return usersList
+
     def searchMovies(self, genres, N):
 
         if len(genres) == 0:

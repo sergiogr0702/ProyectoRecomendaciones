@@ -7,6 +7,8 @@ from data.orient_setup import dbConectar
 from forms.RecomendationByFilmForm import RecomendationByFilmForm
 from forms.RecomendationByUserForm import RecomendationByUserForm
 from forms.SearchMoviesForm import SearchMoviesForm
+from forms.SearchUsersForm import SearchUsersForm
+from utils.dataConverter import discretize_ocupacion, discretize_age
 
 my_routes = Blueprint('my_routes', __name__)
 
@@ -66,7 +68,20 @@ def recommendation_by_user():
 
 @my_routes.route('/search_users', methods=["GET", "POST"])
 def search_users():
-    return render_template('pages/search_users.html')
+    form = SearchUsersForm()
+    response = []
+    if form.is_submitted():
+        ocupation = request.form['ocupation']
+        age = request.form['age']
+        gender = request.form['gender']
+        number = request.form['number']
+
+        ocupation = discretize_ocupacion(ocupation)
+        age = discretize_age(int(age))
+
+        response = dao.searchUsers(ocupation, age, gender, number)
+
+    return render_template('pages/search_users.html', form=form, response=response)
 
 
 @my_routes.route('/search_movies', methods=["GET", "POST"])
