@@ -53,3 +53,11 @@ body {
 .flashcard-options:first-child {
     margin-top: 0;
 }
+
+.custom-checkbox {
+    margin-right: 1rem;
+    background-color: #343a40;
+}
+.custom-checkbox + label {
+    margin-right: 2rem;
+}

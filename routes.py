@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request
 from data.orient_setup import dbConectar
 from forms.RecomendationByFilmForm import RecomendationByFilmForm
 from forms.RecomendationByUserForm import RecomendationByUserForm
+from forms.SearchMoviesForm import SearchMoviesForm
 
 my_routes = Blueprint('my_routes', __name__)
 
@@ -43,8 +44,9 @@ def index():
     form = RecomendationByFilmForm()
     response = []
     if form.is_submitted():
-        title = request.form['title']  # Get the value of the 'title' field
-        response = dao.findSimilarMovies(title)
+        title = request.form['title']
+        number = request.form['number']
+        response = dao.findSimilarMovies(title, number)
 
     return render_template('pages/index.html', form=form, response=response)
 
@@ -62,11 +64,19 @@ def recommendation_by_user():
     return render_template('pages/recommendation_by_user.html', form=form, response=response)
 
 
-@my_routes.route('/search_users')
+@my_routes.route('/search_users', methods=["GET", "POST"])
 def search_users():
     return render_template('pages/search_users.html')
 
 
-@my_routes.route('/search_movies')
+@my_routes.route('/search_movies', methods=["GET", "POST"])
 def search_movies():
-    return render_template('pages/search_movies.html')
+    form = SearchMoviesForm()
+    response = []
+    if form.is_submitted():
+        categories = request.form.getlist('categories')
+        number = request.form['number']
+
+        response = dao.searchMovies(categories, number)
+
+    return render_template('pages/search_movies.html', form=form, response=response)

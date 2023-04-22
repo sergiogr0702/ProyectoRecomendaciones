@@ -8,7 +8,8 @@ def createStructure(client):
         client.command("CREATE PROPERTY Movie.Genres EMBEDDEDLIST STRING")
 
         client.command("CREATE INDEX Movie.MovieID ON Movie (MovieID) UNIQUE")
-        client.command("CREATE INDEX Movie_Title ON Movie (Title) FULLTEXT ENGINE LUCENE")
+        client.command("CREATE INDEX Movie.Title ON Movie (Title) FULLTEXT ENGINE LUCENE")
+        client.command("CREATE INDEX Movie.Genres ON Movie (Genres) NOTUNIQUE_HASH_INDEX")
 
     if not client.command('SELECT FROM ( SELECT expand(classes) FROM metadata:schema ) WHERE name = "User"'):
         client.command("CREATE CLASS User EXTENDS V")
@@ -27,4 +28,4 @@ def createStructure(client):
         client.command("CREATE PROPERTY Rating.Rating INTEGER")
         client.command("CREATE PROPERTY Rating.Timestamp DATE")
 
-        client.command("CREATE INDEX Rating_UserID_MovieID ON Rating(UserID, MovieID) UNIQUE")
+        client.command("CREATE INDEX Rating.UserID.MovieID ON Rating(UserID, MovieID) UNIQUE")

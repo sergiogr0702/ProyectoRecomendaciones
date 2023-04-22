@@ -8,7 +8,31 @@ class operations:
     def __init__(self, client):
         self.client = client
 
-    def findSimilarMovies(self, movie_title):
+    def searchMovies(self, genres, N):
+
+        if len(genres) == 0:
+            return []
+
+        query = "SELECT MovieID, Title FROM Movie WHERE {} LIMIT {}"
+
+        genre_conditions = " AND ".join(["genres CONTAINS '{}'".format(genre) for genre in genres])
+
+        final_query = query.format(genre_conditions, N)
+
+        results = self.client.command(final_query)
+
+        if len(results) == 0:
+            return []
+
+        moviesList = []
+
+        for item in results:
+            movie_props = item.oRecordData
+            moviesList.append({'movieID': movie_props['MovieID'], 'title': movie_props['Title']})
+
+        return moviesList
+
+    def findSimilarMovies(self, movie_title, N):
         usersIDList = []
         recommendedMovies = SortedDict()
 
@@ -68,8 +92,13 @@ class operations:
         sorted_tree_map_items = sorted(tree_map_items, key=lambda x: x[1].counter, reverse=True)
 
         recommendedMoviesList = []
+        index = 0
         for key, value in sorted_tree_map_items:
-            recommendedMoviesList.append({'title': key, 'genres': value.genres})
+            if index < int(N):
+                recommendedMoviesList.append({'title': key, 'genres': value.genres})
+                index += 1
+            else:
+                break
 
         return recommendedMoviesList
 

@@ -9,22 +9,22 @@
     <div class="form-wrapper p-2" style="background-color: #303536; border-radius: 0.5rem; margin-bottom: 0.5rem;">
         <form method="POST" role="form" action="{{ url_for('my_routes.index') }}">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-5">
                     {{ form.title.label }}
                 </div>
+                <div class="col-md-5">
+                    {{ form.number.label }}
+                </div>
+                <div class="col-md-2"></div>
             </div>
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-5">
                     {{ form.title }}
-                    {% if form.title.errors %}
-                        <ul class="errors">
-                            {% for error in form.title.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
+                    {{ form.number }}
+                </div>
+                <div class="col-md-2">
                     {{ form.submit }}
                 </div>
             </div>

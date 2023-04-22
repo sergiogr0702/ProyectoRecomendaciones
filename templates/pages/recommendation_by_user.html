@@ -4,8 +4,7 @@
 <div class="container-fluid">
     <h1 class="mt-4">Recomendaciones por usuario</h1>
     <p>Dado el <code>identificador</code> de un usuario se mostrarán las películas que
-        gustaron a usuarios similares al escogido. <b>Advertencia, esta consulta puede tardar
-            unos segundos en ejecutarse. Se ruega tener paciencia.</b></p>
+        gustaron a usuarios similares al escogido.</p>
 
     <div class="form-wrapper p-2" style="background-color: #303536; border-radius: 0.5rem; margin-bottom: 0.5rem;">
         <form method="POST" role="form" action="{{ url_for('my_routes.recommendation_by_user') }}">
