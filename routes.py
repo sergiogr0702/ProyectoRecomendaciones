@@ -17,10 +17,10 @@ print("---Conectando a la base de datos---")
 client = dbConectar("Pruebas", "root", "123456")
 
 # TODO Solo descomentar esto cuando se tenga que entregar el proyecto
-""""
+
 # Lectura y preparacion de los datos leidos desde los csv
 print("---Preparando datos para la insercion---")
-[moviesDf, ratingDf, usersDf] = readCSV("C:\\Users\\Usuario\\Desktop\\UNI\\2\\RIBW\\TrabajoRIBW\\ml-1m")
+[moviesDf, ratingDf, usersDf] = readCSV("ml-1m")
 
 print("---Creando estructura de la base de datos con indices---")
 createStructure(client)
@@ -30,15 +30,16 @@ createStructure(client)
 # 3883 peliculas
 # 4500 usuarios
 # 80853 ratings
-# Aviso importante, tarda en ejecutar unos 5 min porque OrientDB es un poco lento al insertar datos ya que 
+# Aviso importante, tarda en ejecutar unos 3 min porque OrientDB es un poco lento al insertar datos ya que
 # los replica en varios clusters internos
 
 print("---Insertando datos en OrientDB---")
 dataInsertion(client, moviesDf, ratingDf, usersDf)
 print("---Datos insertados correctamente =)---")
-"""
 
 dao = operations(client)
+
+print("---Aplicacion iniciada---")
 
 
 @my_routes.route('/', methods=["GET", "POST"])
