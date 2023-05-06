@@ -8,7 +8,49 @@ class operations:
     def __init__(self, client):
         self.client = client
 
-    def findSimilarMovies(self, movie_title):
+    def searchUsers(self, ocupation, age, gender, N):
+
+        query = "SELECT UserID, Age, Gender, Occupation, ZipCode FROM User WHERE Age = {} AND Occupation = {} AND Gender = '{}' LIMIT {}"
+
+        results = self.client.command(query.format(int(age), int(ocupation), gender, N))
+
+        if len(results) == 0:
+            return []
+
+        usersList = []
+
+        for item in results:
+            user_props = item.oRecordData
+            usersList.append({'userID': user_props['UserID'], 'age': user_props['Age'], 'gender': user_props['Gender'],
+                              'ocupation': user_props['Occupation'], 'zipCode': user_props['ZipCode']})
+
+        return usersList
+
+    def searchMovies(self, genres, N):
+
+        if len(genres) == 0:
+            return []
+
+        query = "SELECT MovieID, Title FROM Movie WHERE {} LIMIT {}"
+
+        genre_conditions = " AND ".join(["genres CONTAINS '{}'".format(genre) for genre in genres])
+
+        final_query = query.format(genre_conditions, N)
+
+        results = self.client.command(final_query)
+
+        if len(results) == 0:
+            return []
+
+        moviesList = []
+
+        for item in results:
+            movie_props = item.oRecordData
+            moviesList.append({'movieID': movie_props['MovieID'], 'title': movie_props['Title']})
+
+        return moviesList
+
+    def findSimilarMovies(self, movie_title, N):
         usersIDList = []
         recommendedMovies = SortedDict()
 
@@ -68,8 +110,13 @@ class operations:
         sorted_tree_map_items = sorted(tree_map_items, key=lambda x: x[1].counter, reverse=True)
 
         recommendedMoviesList = []
+        index = 0
         for key, value in sorted_tree_map_items:
-            recommendedMoviesList.append({'title': key, 'genres': value.genres})
+            if index < int(N):
+                recommendedMoviesList.append({'title': key, 'genres': value.genres})
+                index += 1
+            else:
+                break
 
         return recommendedMoviesList
 
@@ -103,7 +150,7 @@ class operations:
         similarity_score = (total_similarity + rating_diff) * movie_similarity
         return similarity_score
 
-    def recommendMoviesGivenUser(self, target_user_id, N):
+    def recommendMoviesGivenUserV2(self, target_user_id, N):
         # Step 1: Retrieve the info of the target user
         query = "SELECT UserID, Age, Gender, Occupation, ZipCode FROM User WHERE UserID = {} LIMIT 1"
         target_user_props = self.client.command(query.format(target_user_id))
@@ -113,36 +160,39 @@ class operations:
 
         target_user_props = target_user_props[0].oRecordData
 
-        # Step 2: Retrieve the info of all other users
-        other_users_props = {}
-        query = "SELECT UserID, Age, Gender, Occupation, ZipCode FROM User WHERE NOT (UserID = {}) ORDER BY UserID"
-        results = self.client.command(query.format(target_user_id))
-        for item in results:
-            user_props = item.oRecordData
-            if user_props['UserID'] != target_user_id:
-                other_users_props[user_props['UserID']] = user_props
-
-        # Step 3: Retrieve the ratings of the target user
+        # Step 2: Retrieve and filter the ratings of the target user
         target_user_ratings = {}
+        target_movieIDs = []
         query = "SELECT MovieID, Rating FROM Rating WHERE UserID = {}"
         results = self.client.command(query.format(target_user_id))
         for item in results:
             movie_id = item.MovieID
             rating = item.Rating
-            target_user_ratings[movie_id] = rating
 
-        # Step 4: Retrieve the ratings of all other users
+            if rating > 3:
+                target_movieIDs.append(movie_id)
+                target_user_ratings[movie_id] = rating
+
+        # Step 3: Retrieve the info of all other users that have watched the films the user has watched
+        other_users_props = {}
         other_users_ratings = {}
-        query = "SELECT UserID, MovieID, Rating FROM Rating WHERE NOT (UserID = {}) ORDER BY UserID"
-        results = self.client.command(query.format(target_user_id))
-        for user_id, group in itertools.groupby(results, key=lambda x: x.UserID):
-            if user_id != target_user_id:
+        query = "SELECT UserID, Age, Gender, Occupation, ZipCode FROM (TRAVERSE in('Rating') FROM (SELECT FROM Movie WHERE MovieID In [{}]) MAXDEPTH 1) WHERE @class = 'User' AND UserID != {}"
+        results = self.client.command(query.format(target_user_id, target_movieIDs))
+        for item in results:
+            user_props = item.oRecordData
+            if user_props['UserID'] != target_user_id:
+                other_users_props[user_props['UserID']] = user_props
+
+                # Step 4: Retrieve the ratings of each user
+                query = "SELECT MovieID, Rating FROM Rating WHERE UserID = {} AND MovieID NOT IN [{}]"
+                results = self.client.command(query.format(user_props['UserID'], target_movieIDs))
+
                 ratings = {}
-                for item in group:
-                    movie_id = item.MovieID
-                    rating = item.Rating
+                for rating in results:
+                    movie_id = rating.MovieID
+                    rating = rating.Rating
                     ratings[movie_id] = rating
-                other_users_ratings[user_id] = ratings
+                other_users_ratings[user_props['UserID']] = ratings
 
         # Step 5: Compute the similarity between the target user and each other user based on their ratings
         similarity_scores = {}
@@ -158,14 +208,11 @@ class operations:
         # Step 7: Retrieve the movies ids that the most similar user(s) rated highly but the target user has not rated
         recommended_movies = []
         for user_id in most_similar_users:
-            query = "SELECT MovieID, Rating FROM Rating WHERE UserID = {} AND MovieID NOT IN [{}]"
-            rated_movie_ids = ','.join(str(movie_id) for movie_id in target_user_ratings.keys())
-            results = self.client.command(query.format(user_id, rated_movie_ids))
-            for item in results:
-                movie_id = item.MovieID
-                rating = item.Rating
-                if rating >= 4:  # Replace 4 with the minimum rating required for a movie to be recommended
-                    recommended_movies.append(movie_id)
+            ratings_prop = other_users_ratings[user_id]
+            for movie_key in ratings_prop.keys():
+                if not(movie_key in target_movieIDs) and ratings_prop[movie_key] > 2:
+                    recommended_movies.append(movie_key)
+
         recommended_movies = [int(movie_id) for movie_id in recommended_movies]  # Convert to a list of integers
         recommended_movies = list(set(recommended_movies)) # Remove duplicates
         recommended_movies = recommended_movies[:int(N)]  # Get the first N movies id from the list

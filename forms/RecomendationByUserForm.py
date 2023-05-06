@@ -17,7 +17,7 @@ class RecomendationByUserForm(FlaskForm):
         'Número de recomendaciones',
         [
             DataRequired(),
-            NumberRange(min=1)
+            NumberRange(min=1, max=100)
         ],
         render_kw={"class": "form-control", "id": "floatingInput"}
     )

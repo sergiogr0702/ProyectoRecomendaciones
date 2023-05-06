@@ -3,7 +3,48 @@
 {% block content %}
 <div class="container-fluid">
     <h1 class="mt-4">Búsqueda de películas</h1>
-    <p></p>
-    <!-- rest of the template -->
+    <p>Dada una lista de <code>categorías</code> y el <code>número de películas</code> que se desea obtener, permite buscar las
+        peliculas que incluyan esas categorías en la base de datos.</p>
+
+    <div class="form-wrapper p-2" style="background-color: #303536; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+        <form method="POST" role="form" action="{{ url_for('my_routes.search_movies') }}">
+            <div class="row">
+                <div class="col-md-5">
+                    {{ form.categories.label(class_="form-label") }}
+                    {{ form.categories(class_="list-group") }}
+                </div>
+                <div class="col-md-5">
+                    {{ form.number.label }}
+                    {{ form.number }}
+                </div>
+                <div class="col-md-2 pt-4">
+                    {{ form.submit }}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div style="background-color: #303536; border-radius: .25rem;">
+        <h4 class="m-2">Respuesta</h4>
+
+        <div class="card-grid d-flex flex-wrap gap-3" >
+            {% for item in response %}
+                <div class="card p-2 m-2" style="box-shadow: 0 0 5px 2px rgba(0, 0, 0, .3); background-color: #4b5556; border-radius: .25rem; min-width: 300px;">
+                    <div class="front">
+                        <div class="front_title">
+                            <p class="mb-2" style="font-size: 1.2rem; font-weight: bold;">ID:</p>
+                        </div>
+                        <div class="front_name mb-3 ml-3">
+                            {{ item.movieID }}
+                        </div>
+                        <div class="flashcard-options" style="margin-top: .5rem; color: #fff; font-size: .75rem;">
+                            <p class="mb-2" style="font-size: 1.2rem; font-weight: bold;">Título:</p>
+                            {{ item.title }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

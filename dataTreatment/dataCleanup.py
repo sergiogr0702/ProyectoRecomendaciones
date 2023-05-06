@@ -12,11 +12,11 @@ def readCSV(dirPath):
     # Use the os module to change the current working directory to the directory you want to open
     os.chdir(dirPath)
 
-    moviesDf = pd.read_csv(dirPath + "\\movies.dat", sep="::", engine="python", header=None,
+    moviesDf = pd.read_csv("movies.dat", sep="::", engine="python", header=None,
                            names=["MovieID", "Title", "Genres"], encoding='ANSI')
-    ratingsDf = pd.read_csv(dirPath + "\\ratings.dat", sep="::", engine="python", header=None,
+    ratingsDf = pd.read_csv("ratings.dat", sep="::", engine="python", header=None,
                             names=["UserID", "MovieID", "Rating", "Timestamp"])
-    usersDf = pd.read_csv(dirPath + "\\users.dat", sep="::", engine="python", header=None,
+    usersDf = pd.read_csv("users.dat", sep="::", engine="python", header=None,
                           names=["UserID", "Gender", "Age", "Occupation", "ZipCode"])
 
     # Remove apostrophes from all string columns
